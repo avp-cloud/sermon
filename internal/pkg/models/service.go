@@ -1,0 +1,111 @@
+package models
+
+import (
+	"encoding/json"
+)
+
+type Service struct {
+	// ID specifies the id of the service
+	ID uint `json:"id" gorm:"primary_key"`
+
+	// Name specifies the name of service
+	Name string `json:"name"`
+
+	// Endpoint specifies the endpoint of service
+	Endpoint string `json:"endpoint"`
+
+	// UpCodes specifies the comma separated http codes that signify UP status
+	UpCodes string `json:"upCodes"`
+
+	// Tags specifies metadata for the service
+	Metadata string `json:"metadata"`
+
+	// Status specifies the status of the endpoint (up/down)
+	Status Status `json:"status"`
+
+	// Metrics specifies the last collected metrics
+	Metrics Metrics `json:"metrics"`
+
+	// TimeSeriesMetrics for last few iteration metrics
+	TimeSeriesMetrics []Metrics `json:"timeSeriesMetrics"`
+}
+
+// Metrics represents a set of metrics
+type Metrics struct {
+	//Timestamp
+	Timestamp string `json:"timeStamp"`
+	// DNSTime ...
+	DNSTime float64 `json:"dnsTime"`
+	// ConnectTime ...
+	ConnectTime float64 `json:"connectTime"`
+	// TLSTime ...
+	TLSTime float64 `json:"tlsTime"`
+	// DNSFirstByteTimeTime ...
+	FirstByteTime float64 `json:"firstByteTime"`
+	// TotalTime ...
+	TotalTime float64 `json:"totalTime"`
+}
+
+type DBService struct {
+	// ID specifies the id of the service
+	ID uint `json:"id" gorm:"primary_key"`
+
+	// Name specifies the name of service
+	Name string `json:"name"`
+
+	// Endpoint specifies the endpoint of service
+	Endpoint string `json:"endpoint"`
+
+	// UpCodes specifies the comma separated http codes that signify UP status
+	UpCodes string `json:"upCodes"`
+
+	// Tags specifies metadata for the service
+	Metadata string `json:"metadata"`
+
+	// Status specifies the status of the endpoint (up/down)
+	Status Status `json:"status"`
+
+	// Metrics specifies json string of the last collected metrics
+	Metrics string `json:"metrics"`
+
+	// TimeSeriesMetrics json string of last few iteration metrics
+	TimeSeriesMetrics string `json:"timeSeriesMetrics"`
+}
+
+type Status string
+
+const (
+	StatusDown Status = "DOWN"
+	StatusUp Status = "UP"
+)
+
+func DBSvcToSvc(dbSvc DBService) Service {
+	var met Metrics
+	var tmet []Metrics
+	_ = json.Unmarshal([]byte(dbSvc.Metrics), &met)
+	_ = json.Unmarshal([]byte(dbSvc.TimeSeriesMetrics), &tmet)
+	return Service{
+		ID:                dbSvc.ID,
+		Name:              dbSvc.Name,
+		Endpoint:          dbSvc.Endpoint,
+		UpCodes:           dbSvc.UpCodes,
+		Metadata:          dbSvc.Metadata,
+		Status:            dbSvc.Status,
+		Metrics:           met,
+		TimeSeriesMetrics: tmet,
+	}
+}
+
+func FormatDBSvcMetrics(dbSvc *DBService, metrics Metrics) {
+	var ms []Metrics
+	_ = json.Unmarshal([]byte(dbSvc.TimeSeriesMetrics), &ms)
+	if len(ms) == 30 {
+		// maintain 30 records
+		ms = ms[1:len(ms)]
+	}
+	ms = append(ms, metrics)
+	metB, _ := json.Marshal(metrics)
+	dbSvc.Metrics = string(metB)
+	msB, _ := json.Marshal(ms)
+	dbSvc.TimeSeriesMetrics = string(msB)
+}
