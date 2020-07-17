@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptrace"
@@ -58,7 +59,7 @@ func GetStatus(url, upCodes string) models.Status {
 		log.Println(err)
 		return models.StatusDown
 	}
-	if !strings.Contains(upCodes, string(resp.StatusCode)) {
+	if !strings.Contains(upCodes, fmt.Sprintf("%d",resp.StatusCode)) {
 		return models.StatusDown
 	}
 	return models.StatusUp
