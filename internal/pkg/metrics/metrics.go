@@ -71,6 +71,7 @@ func computeOverview() {
 	var dbSvcs []models.DBService
 	models.DB.Find(&dbSvcs)
 	log.Println(fmt.Sprintf("Computing service overview for %d services", len(dbSvcs)))
+	models.LiveOverview = &models.Overview{}
 	for _, dbSvc := range dbSvcs {
 		service := models.DBSvcToSvc(dbSvc)
 
