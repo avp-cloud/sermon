@@ -13,7 +13,7 @@ import (
 	"github.com/avp-cloud/sermon/internal/pkg/models"
 )
 
-var pollInterval = uint64(1)
+var pollInterval = uint64(15)
 
 func periodicSweep() {
 	metrics.CollectMetrics()
@@ -46,7 +46,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8081"
+		port = "80"
 	}
 	// Run the server
 	r.Run(fmt.Sprintf("0.0.0.0:%s", port))

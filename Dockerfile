@@ -20,7 +20,7 @@ RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 COPY --from=builder /app/sermon .
 
-ENV DB_PATH "/sermon.db"
+ENV DB_PATH "sermon.db"
 ENV POLL_INTERVAL "15"
 ENV PORT "80"
 EXPOSE 80
