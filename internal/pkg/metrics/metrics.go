@@ -54,6 +54,7 @@ func GetMetrics(url string) (models.Metrics, error) {
 func GetStatus(url, upCodes string) models.Status {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		Proxy: http.ProxyFromEnvironment,
 	}
 	client := &http.Client{Transport: tr}
 	resp, err := client.Get(url)
